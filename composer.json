@@ -9,5 +9,10 @@
             "email": "gary@vicchi.org"
         }
     ],
-    "require": {}
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Woeplanet\\": "Woeplanet"
+        }
+    }
 }
