@@ -1,0 +1,13 @@
+{
+    "name": "woeplanet/woeplanet-tools",
+    "description": "A collection of helpful PHP classes used by other \"woeplanet\" rcode repos",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Gary Gale",
+            "email": "gary@vicchi.org"
+        }
+    ],
+    "require": {}
+}
