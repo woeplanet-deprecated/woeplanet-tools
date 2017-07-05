@@ -27,5 +27,24 @@ class Path {
         $return = self::createPath($prev_path);
         return ($return && is_writable($prev_path)) ? mkdir($path) : false;
     }
+
+    static public function build_enpathified_filespec($base_dir, $id, $file_format="%s.geojson") {
+        $id_path = \Woeplanet\Utils\Path::enpathify($id);
+        $file_name = sprintf($file_format, $id);
+
+        return sprintf('%s/%s/%s', $base_dir, $id_path, $file_name);
+    }
+
+    static public function deserialise_json_data($file) {
+        $json = NULL;
+        if (file_exists($file) && is_readable($file)) {
+            if (($data = file_get_contents($file)) !== FALSE) {
+                $assoc = true;
+                $json = json_decode($data, $assoc);
+            }
+        }
+
+        return $json;
+    }
 }
 ?>
