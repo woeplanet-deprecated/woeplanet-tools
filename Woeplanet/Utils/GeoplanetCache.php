@@ -72,8 +72,9 @@ class GeoplanetCache {
                 'continent' => \PDO::PARAM_INT,
                 'concordance' => \PDO::PARAM_STR,
                 'supercedes' => \PDO::PARAM_STR,
-                'superceded' => \PDO::PARAM_INT,
-                'history' => \PDO::PARAM_STR
+                'superceded' => \PDO::PARAM_STR,
+                'history' => \PDO::PARAM_STR,
+                'updated' => \PDO::PARAM_INT
             ],
             'adjacencies' => [
                 'woeid' => \PDO::PARAM_INT,
@@ -182,7 +183,7 @@ class GeoplanetCache {
     public function get_fields() {
         return $this->fields;
     }
-    
+
     public function get_meta() {
         $query = $this->prepare(__FUNCTION__);
         if (!$query->execute()) {
@@ -479,7 +480,7 @@ class GeoplanetCache {
         $values = [];
 
         $doc = $this->pack_place($doc);
-
+        $doc['updated'] = time();
         foreach ($doc as $key => $value) {
             $fields[] = $key;
             $keys[] = ':' . $key;
@@ -513,6 +514,7 @@ class GeoplanetCache {
         $doc = $this->pack_place($doc);
         $woeid = $doc['woeid'];
         unset($doc['woeid']);
+        $doc['updated'] = time();
 
         // error_log(var_export($doc, true));
         $values = [];
@@ -696,6 +698,9 @@ class GeoplanetCache {
         if (isset($doc['supercedes']) && !empty($doc['supercedes'])) {
             $doc['supercedes'] = unserialize($doc['supercedes']);
         }
+        if (isset($doc['superceded']) && !empty($doc['superceded'])) {
+            $doc['superceded'] = unserialize($doc['superceded']);
+        }
         if (isset($doc['history']) && !empty($doc['history'])) {
             $doc['history'] = unserialize($doc['history']);
         }
@@ -732,6 +737,9 @@ class GeoplanetCache {
         }
         if (isset($doc['supercedes']) && !empty($doc['supercedes'])) {
             $doc['supercedes'] = serialize($doc['supercedes']);
+        }
+        if (isset($doc['superceded']) && !empty($doc['superceded'])) {
+            $doc['superceded'] = serialize($doc['superceded']);
         }
         if (isset($doc['history']) && !empty($doc['history'])) {
             $doc['history'] = serialize($doc['history']);
@@ -781,8 +789,9 @@ class GeoplanetCache {
                     continent INTEGER,
                     concordance STRING,
                     supercedes STRING,
-                    superceded INTEGER,
-                    history STRING
+                    superceded STRING,
+                    history STRING,
+                    updated INTEGER
                 );';
                 break;
 
