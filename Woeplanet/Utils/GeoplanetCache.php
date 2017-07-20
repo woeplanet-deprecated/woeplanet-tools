@@ -256,7 +256,7 @@ class GeoplanetCache {
                     return $place;
                 }
                 else {
-                    if ($place['parent'] === NULL) {
+                    if ($place['parent'] === NULL || $place['parent'] === 0) {
                         error_log('No more parents!');
                         break;
                     }
