@@ -238,6 +238,7 @@ class GeoplanetCache {
     }
 
     public function find_ancestor($woeid, $pt) {
+        $source_woeid = $woeid;
         $place = $this->get_woeid($woeid);
         // error_log(var_export($place, true));
         $found = false;
@@ -263,7 +264,8 @@ class GeoplanetCache {
                 $woeid = $place['parent'];
             }
             else {
-                error_log('No match for parent WOEID!');
+                error_log(sprintf('find_ancestor: Start WOEID %d, placetype %d', $source_woeid, $pt));
+                error_log(sprintf('No match for parent WOEID %d', $woeid));
                 break;
             }
         }
