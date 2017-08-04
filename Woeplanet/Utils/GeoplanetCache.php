@@ -30,6 +30,7 @@ class GeoplanetCache {
     const GET_COORDS = 'get_coords';
     const GET_ANCESTORS = 'get_ancestors';
     const GET_WOF = 'get_wof';
+    const GET_COUNTRY = 'get_country';
 
     private $fields;
     private $sql;
@@ -118,10 +119,11 @@ class GeoplanetCache {
             self::GET_WOEID => 'SELECT DISTINCT * FROM places WHERE woeid = :woeid;',
             self::GET_PARENT => 'SELECT parent FROM places WHERE woeid = :woeid;',
             self::GET_CHILDREN => 'SELECT children from children WHERE woeid = :woeid;',
-            self::GET_ADMINS => 'SELECT * FROM admins WHERE woeid= :woeid;',
-            self::GET_COORDS => 'SELECT * FROM coords WHERE woeid= :woeid;',
-            self::GET_ANCESTORS => 'SELECT ancestors FROM ancestors WHERE woeid= :woeid;',
-            self::GET_WOF => 'SELECT * FROM wof WHERE wofid= :wofid;'
+            self::GET_ADMINS => 'SELECT * FROM admins WHERE woeid = :woeid;',
+            self::GET_COORDS => 'SELECT * FROM coords WHERE woeid = :woeid;',
+            self::GET_ANCESTORS => 'SELECT ancestors FROM ancestors WHERE woeid = :woeid;',
+            self::GET_WOF => 'SELECT * FROM wof WHERE wofid = :wofid;',
+            self::GET_COUNTRY => 'SELECT * FROM countries WHERE iso2 = :iso;'
         ];
 
         $this->statements = [
@@ -132,7 +134,8 @@ class GeoplanetCache {
             self::GET_ADMINS => NULL,
             self::GET_COORDS => NULL,
             self::GET_ANCESTORS => NULL,
-            self::GET_WOF => NULL
+            self::GET_WOF => NULL,
+            self::GET_COUNTRY => NULL
         ];
 
         // if ($this->setup) {
@@ -211,10 +214,6 @@ class GeoplanetCache {
             throw new \Exception(sprintf('%s: PDOStatement::execute() (%s)', __FUNCTION__, $this->get_cache_error()));
         }
 
-        // if (!($return = $query->fetch(\PDO::FETCH_ASSOC))) {
-        //     throw new \Exception(sprintf('%s: PDOStatement::fetch() (%s)', __FUNCTION__, $this->get_cache_error()));
-        // }
-
         $return = $query->fetch(\PDO::FETCH_ASSOC);
         if (!empty($return)) {
             $return = $this->unpack_place($return);
@@ -225,16 +224,22 @@ class GeoplanetCache {
 
         $query->closeCursor();
         return $return;
-        //
-        // $sql = 'SELECT DISTINCT * FROM places WHERE woeid = :woeid;';
-        // $select = $this->db->prepare($sql);
-        // $select->bindParam(':woeid', $woeid, $this->fields['places']['woeid']);
-        // $select->execute();
-        // $ret = $select->fetch(\PDO::FETCH_ASSOC);
-        // if ($ret) {
-        //     return $this->unpack_place($ret);
-        // }
-        // return NULL;
+    }
+
+    public function get_country($iso) {
+        $query = $this->prepare(__FUNCTION__);
+        $query->bindValue(':iso', $iso, $this->fields['countries']['iso2']);
+        if (!$query->execute()) {
+            throw new \Exception(sprintf('%s: PDOStatement::execute() (%s)', __FUNCTION__, $this->get_cache_error()));
+        }
+
+        $return = $query->fetch(\PDO::FETCH_ASSOC);
+        if (empty($return)) {
+            $return = NULL;
+        }
+
+        $query->closeCursor();
+        return $return;
     }
 
     public function find_ancestor($woeid, $pt) {
@@ -955,6 +960,7 @@ class GeoplanetCache {
 
             case self::COUNTRIES_TABLE:
                 $sql .= 'CREATE UNIQUE INDEX IF NOT EXISTS countries_by_woeid ON countries(woeid);';
+                $sql .= 'CREATE UNIQUE INDEX IF NOT EXISTS countries_by_iso ON countries(iso2);';
                 break;
 
             case self::WOF_TABLE:
