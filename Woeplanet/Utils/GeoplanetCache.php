@@ -75,7 +75,8 @@ class GeoplanetCache {
                 'supercedes' => \PDO::PARAM_STR,
                 'superceded' => \PDO::PARAM_STR,
                 'history' => \PDO::PARAM_STR,
-                'updated' => \PDO::PARAM_INT
+                'updated' => \PDO::PARAM_INT,
+                'geometry' => \PDO::PARAM_STR
             ],
             'adjacencies' => [
                 'woeid' => \PDO::PARAM_INT,
@@ -261,7 +262,7 @@ class GeoplanetCache {
 
     public function get_maxwoeid() {
         $meta = $this->get_meta();
-        if (isset($meta['maxwoeid']) && !empty($meta['maxwoeid'])) {
+        if (Fields::hasField($meta, 'maxwoeid')) {
             return intval($meta['maxwoeid']);
         }
 
@@ -400,6 +401,16 @@ class GeoplanetCache {
         $fields = [];
         $keys = [];
         $values = [];
+
+        if (!Fields::hasField($doc, 'geometry')) {
+            $doc['geometry'] = [
+                'type' => 'Point',
+                'cordinates' => [
+                    0.0,
+                    0.0
+                ]
+            ];
+        }
 
         $doc = $this->pack_place($doc);
         $doc['updated'] = time();
@@ -589,35 +600,38 @@ class GeoplanetCache {
     }
 
     public function unpack_place($doc) {
-        if (isset($doc['adjacent']) && !empty($doc['adjacent'])) {
+        if (Fields::hasField($doc, 'adjacent')) {
             $doc['adjacent'] = unserialize($doc['adjacent']);
         }
-        if (isset($doc['alias_q']) && !empty($doc['alias_q'])) {
+        if (Fields::hasField($doc, 'alias_q')) {
             $doc['alias_q'] = unserialize($doc['alias_q']);
         }
-        if (isset($doc['alias_v']) && !empty($doc['alias_v'])) {
+        if (Fields::hasField($doc, 'alias_v')) {
             $doc['alias_v'] = unserialize($doc['alias_v']);
         }
-        if (isset($doc['alias_a']) && !empty($doc['alias_a'])) {
+        if (Fields::hasField($doc, 'alias_a')) {
             $doc['alias_a'] = unserialize($doc['alias_a']);
         }
-        if (isset($doc['alias_s']) && !empty($doc['alias_s'])) {
+        if (Fields::hasField($doc, 'alias_s')) {
             $doc['alias_s'] = unserialize($doc['alias_s']);
         }
-        if (isset($doc['alias_p']) && !empty($doc['alias_p'])) {
+        if (Fields::hasField($doc, 'alias_p')) {
             $doc['alias_p'] = unserialize($doc['alias_p']);
         }
-        if (isset($doc['concordance']) && !empty($doc['concordance'])) {
+        if (Fields::hasField($doc, 'concordance')) {
             $doc['concordance'] = unserialize($doc['concordance']);
         }
-        if (isset($doc['supercedes']) && !empty($doc['supercedes'])) {
+        if (Fields::hasField($doc, 'supercedes')) {
             $doc['supercedes'] = unserialize($doc['supercedes']);
         }
-        if (isset($doc['superceded']) && !empty($doc['superceded'])) {
+        if (Fields::hasField($doc, 'superceded')) {
             $doc['superceded'] = unserialize($doc['superceded']);
         }
-        if (isset($doc['history']) && !empty($doc['history'])) {
+        if (Fields::hasField($doc, 'history')) {
             $doc['history'] = unserialize($doc['history']);
+        }
+        if (Fields::hasField($doc, 'geometry')) {
+            $doc['geometry'] = unserialize($doc['geometry']);
         }
 
         return $doc;
@@ -628,35 +642,38 @@ class GeoplanetCache {
             throw new Exception('pack_place: empty document');
         }
 
-        if (isset($doc['adjacent']) && !empty($doc['adjacent'])) {
+        if (Fields::hasField($doc, 'adjacent')) {
             $doc['adjacent'] = serialize($doc['adjacent']);
         }
-        if (isset($doc['alias_q']) && !empty($doc['alias_q'])) {
+        if (Fields::hasField($doc, 'alias_q')) {
             $doc['alias_q'] = serialize($doc['alias_q']);
         }
-        if (isset($doc['alias_v']) && !empty($doc['alias_v'])) {
+        if (Fields::hasField($doc, 'alias_v')) {
             $doc['alias_v'] = serialize($doc['alias_v']);
         }
-        if (isset($doc['alias_a']) && !empty($doc['alias_a'])) {
+        if (Fields::hasField($doc, 'alias_a')) {
             $doc['alias_a'] = serialize($doc['alias_a']);
         }
-        if (isset($doc['alias_s']) && !empty($doc['alias_s'])) {
+        if (Fields::hasField($doc, 'alias_s')) {
             $doc['alias_s'] = serialize($doc['alias_s']);
         }
-        if (isset($doc['alias_p']) && !empty($doc['alias_p'])) {
+        if (Fields::hasField($doc, 'alias_p')) {
             $doc['alias_p'] = serialize($doc['alias_p']);
         }
-        if (isset($doc['concordance']) && !empty($doc['concordance'])) {
+        if (Fields::hasField($doc, 'concordance')) {
             $doc['concordance'] = serialize($doc['concordance']);
         }
-        if (isset($doc['supercedes']) && !empty($doc['supercedes'])) {
+        if (Fields::hasField($doc, 'supercedes')) {
             $doc['supercedes'] = serialize($doc['supercedes']);
         }
-        if (isset($doc['superceded']) && !empty($doc['superceded'])) {
+        if (Fields::hasField($doc, 'superceded')) {
             $doc['superceded'] = serialize($doc['superceded']);
         }
-        if (isset($doc['history']) && !empty($doc['history'])) {
+        if (Fields::hasField($doc, 'history')) {
             $doc['history'] = serialize($doc['history']);
+        }
+        if (Fields::hasField($doc, 'geometry')) {
+            $doc['geometry'] = serialize($doc['geometry']);
         }
 
         return $doc;
@@ -705,7 +722,8 @@ class GeoplanetCache {
                     supercedes STRING,
                     superceded STRING,
                     history STRING,
-                    updated INTEGER
+                    updated INTEGER,
+                    geometry STRING
                 );';
                 break;
 
