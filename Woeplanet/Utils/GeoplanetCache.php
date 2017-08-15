@@ -137,14 +137,6 @@ class GeoplanetCache {
             self::GET_WOF => NULL,
             self::GET_COUNTRY => NULL
         ];
-
-        // if ($this->setup) {
-        //     foreach ($this->sql as $key => $sql) {
-        //         if (!($this->statements[$key] = $this->db->prepare($sql))) {
-        //             throw new \Exception($sql . ':' . $this->get_cache_error());
-        //         }
-        //     }
-        // }
     }
 
     public function init_cache() {
@@ -192,9 +184,6 @@ class GeoplanetCache {
         if (!$query->execute()) {
             throw new \Exception(sprintf('%s: PDOStatement::execute() (%s)', __FUNCTION__, $this->get_cache_error()));
         }
-        // if (!($return = $query->fetch(\PDO::FETCH_ASSOC))) {
-        //     throw new \Exception(sprintf('%s: PDOStatement::fetch() (%s)', __FUNCTION__, $this->get_cache_error()));
-        // }
 
         $return = $query->fetch(\PDO::FETCH_ASSOC);
         if (empty($return)) {
@@ -203,8 +192,6 @@ class GeoplanetCache {
 
         $query->closeCursor();
         return $return;
-        // $sql = 'SELECT DISTINCT * FROM meta WHERE id = 1;';
-        // return $this->db->query($sql)->fetch(\PDO::FETCH_ASSOC);
     }
 
     public function get_woeid($woeid) {
@@ -245,19 +232,13 @@ class GeoplanetCache {
     public function find_ancestor($woeid, $pt) {
         $source_woeid = $woeid;
         $place = $this->get_woeid($woeid);
-        // error_log(var_export($place, true));
         $found = false;
         $woeid = $place['parent'];
 
         while (!$found && NULL !== $place) {
-            // error_log('Looking for parent WOEID ' . $woeid);
             $place = $this->get_woeid($woeid);
             if ($place !== NULL) {
-                // error_log(var_export($place, true));
-                // error_log('Found parent: ' . $place['name'] . ' (' . $place['placetype'] . '/' . $place['placetypename'] . ')');
-                // error_log('Checking against placetype ' . intval($pt));
                 if (intval($place['placetype']) === intval($pt)) {
-                    // error_log($woeid . ' - found matching ancestor ' . $place['name']);
                     return $place;
                 }
                 else {
@@ -307,15 +288,6 @@ class GeoplanetCache {
 
         $query->closeCursor();
         return $return;
-
-        // $sql = 'SELECT parent FROM places WHERE woeid = :woeid;';
-        // $select = $this->db->prepare($sql);
-        // $select->execute([':woeid' => $woeid]);
-        // $ret = $select->fetch(\PDO::FETCH_ASSOC);
-        // if ($ret) {
-        //     return $ret['parent'];
-        // }
-        // return NULL;
     }
 
     public function get_children($woeid) {
@@ -338,15 +310,6 @@ class GeoplanetCache {
 
         $query->closeCursor();
         return $return;
-
-        // $sql = 'SELECT children from children WHERE woeid = :woeid;';
-        // $select = $this->db->prepare($sql);
-        // $select->execute([':woeid' => $woeid]);
-        // $ret = $select->fetch(\PDO::FETCH_ASSOC);
-        // if ($ret) {
-        //     return unserialize($ret['children']);
-        // }
-        // return NULL;
     }
 
     public function get_admins($woeid) {
@@ -369,32 +332,6 @@ class GeoplanetCache {
 
         $query->closeCursor();
         return $return;
-
-        // $sql = 'SELECT * FROM admins WHERE woeid=' . intval($woeid) . ';';
-        // if (!($query = $this->db->prepare($sql))) {
-        //     $err = $this->get_cache_error();
-        //     error_log("get_admins for $woeid failed prepare: $err");
-        //     return NULL;
-        // }
-        //
-        // if (!($query->execute())) {
-        //     $err = $this->get_cache_error();
-        //     error_log("get_admins for $woeid failed execute: $err");
-        //     return NULL;
-        // }
-        //
-        // $value = $query->fetchAll(\PDO::FETCH_ASSOC);
-        // if ($value === false) {
-        //     $err = $this->get_cache_error();
-        //     error_log("get_admins for $woeid failed fetchAll: $err");
-        //     return NULL;
-        // }
-        //
-        // else if (!empty($value)) {
-        //     return $value[0];
-        // }
-        //
-        // return NULL;
     }
 
     public function get_coords($woeid) {
@@ -417,28 +354,6 @@ class GeoplanetCache {
 
         $query->closeCursor();
         return $return;
-
-        // $query = $this->statements[__FUNCTION__];
-        // $query->bindValue(':woeid', intval($woeid));
-        //
-        // if (!($query->execute())) {
-        //     $err = $this->get_cache_error();
-        //     error_log("get_coords for $woeid failed execute: $err");
-        //     return NULL;
-        // }
-        //
-        // $value = $query->fetchAll(\PDO::FETCH_ASSOC);
-        // if ($value === false) {
-        //     $err = $this->get_cache_error();
-        //     error_log("get_coords for $woeid failed fetchAll: $err");
-        //     return NULL;
-        // }
-        //
-        // else if (!empty($value)) {
-        //     return $value[0];
-        // }
-        //
-        // return NULL;
     }
 
     public function get_cache_error() {
@@ -498,7 +413,6 @@ class GeoplanetCache {
         }
 
         $sql = 'INSERT OR REPLACE INTO places(' . implode(',', $fields) . ') VALUES(' . implode(',', $keys) . ');';
-        // error_log('sql: ' . $sql);
         $statement = $this->db->prepare($sql);
         if (!$statement) {
             throw new \Exception(sprintf('%s: PDOStatement::prepare() (%s)', __FUNCTION__, $this->get_cache_error()));
@@ -523,7 +437,6 @@ class GeoplanetCache {
         unset($doc['woeid']);
         $doc['updated'] = time();
 
-        // error_log(var_export($doc, true));
         $values = [];
         foreach ($doc as $key => $value) {
             $values[] = $key . ' = :' . $key;
@@ -562,7 +475,6 @@ class GeoplanetCache {
             ];
         }
         $sql = 'INSERT OR REPLACE INTO aliases(' . implode(',', $fields) . ') VALUES(' . implode(',', $keys) . ');';
-        // error_log('sql: ' . $sql);
         $statement = $this->db->prepare($sql);
         if (!$statement) {
             throw new \Exception(sprintf('%s: PDOStatement::prepare() (%s)', __FUNCTION__, $this->get_cache_error()));
@@ -595,7 +507,6 @@ class GeoplanetCache {
             ];
         }
         $sql = 'INSERT OR REPLACE INTO admins(' . implode(',', $fields) . ') VALUES(' . implode(',', $keys) . ');';
-        // error_log('sql: ' . $sql);
         $statement = $this->db->prepare($sql);
         if (!$statement) {
             throw new \Exception(sprintf('%s: PDOStatement::prepare() (%s)', __FUNCTION__, $this->get_cache_error()));
@@ -628,7 +539,6 @@ class GeoplanetCache {
             ];
         }
         $sql = 'INSERT OR REPLACE INTO countries(' . implode(',', $fields) . ') VALUES(' . implode(',', $keys) . ');';
-        // error_log('sql: ' . $sql);
         $statement = $this->db->prepare($sql);
         if (!$statement) {
             throw new \Exception(sprintf('%s: PDOStatement::prepare() (%s)', __FUNCTION__, $this->get_cache_error()));
@@ -661,7 +571,6 @@ class GeoplanetCache {
             ];
         }
         $sql = 'INSERT OR REPLACE INTO wof(' . implode(',', $fields) . ') VALUES(' . implode(',', $keys) . ');';
-        // error_log('sql: ' . $sql);
         $statement = $this->db->prepare($sql);
         if (!$statement) {
             throw new \Exception(sprintf('%s: PDOStatement::prepare() (%s)', __FUNCTION__, $this->get_cache_error()));
@@ -680,7 +589,6 @@ class GeoplanetCache {
     }
 
     public function unpack_place($doc) {
-        // error_log('pre-unpack: ' . var_export($doc, true));
         if (isset($doc['adjacent']) && !empty($doc['adjacent'])) {
             $doc['adjacent'] = unserialize($doc['adjacent']);
         }
@@ -711,7 +619,6 @@ class GeoplanetCache {
         if (isset($doc['history']) && !empty($doc['history'])) {
             $doc['history'] = unserialize($doc['history']);
         }
-        // error_log('post-unpack: ' . var_export($doc, true));
 
         return $doc;
     }
